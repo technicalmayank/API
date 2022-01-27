@@ -1,0 +1,130 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<style>
+.container {
+  border: 2px solid #ccc;
+  background-color: #eee;
+  border-radius: 5px;
+  padding: 16px;
+  margin: 16px 0
+}
+
+.container::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.container img {
+  float: left;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+
+.container span {
+  font-size: 20px;
+  margin-right: 15px;
+}
+
+@media (max-width: 500px) {
+  .container {
+      text-align: center;
+  }
+  .container img {
+      margin: auto;
+      float: none;
+      display: block;
+  }
+}
+</style>
+</head>
+<body>
+
+<h1>API REsponse</h1>
+
+<h1><span id="firstName"></span> <span id="lastName"></span></h1>
+<span id="title"></span>&nbsp;
+<span id="typeCode"></span>&nbsp;
+<span id="emailAddress"></span>&nbsp;
+<span id="updatedAt"></span>&nbsp;
+<span id="statusCode"></span>&nbsp;
+<br/>
+<span id="phones"></span>&nbsp;
+<br/>
+<span id="profile"></span>&nbsp;
+<br/>
+<span id="awards"></span>&nbsp;
+
+<div id="testimonials"></div>
+
+
+<script>
+var getData=()=>{
+var serializedData="{\"sort\":[{\"field\":\"firstName\",\"order\":\"asc\"},{\"field\":\"lastName\",\"order\":\"asc\"}],\"include\":[\"id\",\"userName\",\"name\",\"firstName\",\"lastName\",\"title\",\"emailAddress\",\"typeCode\",\"updatedAt\",\"statusCode\",\"phones\",\"profile\",\"awards\",\"testimonials\",]}";
+jQuery.ajax({
+        url: "https://raywhiteapi.ep.dynamics.net/v1/members",
+        type: "post",
+        headers: {"X-APIKey": "C7C16245-4196-4884-AB77-3313738F77D0"},
+        data: serializedData,
+        dataType: 'json',
+        contentType: "application/json",
+        success:function(result){
+        for(let i=0;i<result.data.length;i++){
+            let value=result.data[i].value;
+            console.log(value)
+
+                 $('#firstName').text(value.firstName);
+                 $('#lastName').text(value.lastName);
+                 $('#title').text(value.title);
+                 $('#emailAddress').text(value.emailAddress);
+                 $('#typeCode').text(value.typeCode);
+                 $('#updatedAt').text(value.updatedAt);
+                 $('#statusCode').text(value.statusCode);
+                 $('#phones').text(value.phones[0].internationalizedNumber);
+
+                let _profile=''
+                for(let k=0;k<value.profile.photos.length;k++){
+                    let _src=value.profile.photos[k].fileName;
+                    console.log(_src)
+                    _profile=_profile+'<a href="'+_src+'"><img style="width:200px;height:150px" src="'+_src+'" alt="'+value.profile.photos[k].type+'"></a><br/>'
+                }
+
+                $('#profile').html(_profile);
+
+                 $('#awards').html('<img style="width:200px;height:150px" src="'+value.awards[0].webLogoUrl+'">');
+
+
+
+                 $.each(value.testimonials,function(index){
+                    let _testimonials = value.testimonials[index];
+                    let _position = _testimonials.position !== undefined ? _testimonials.position:"";
+                    $('#testimonials').append('<div class="container">'+
+                                    '<span>'+_testimonials.detail+'<br/>'+
+                                        _testimonials.person+'<br/>'+
+                                        _position+'</span></div>');
+                 });               
+
+            }
+            
+        }
+    });
+};
+$(document).ready(function(){
+    getData()
+})
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
